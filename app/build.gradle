@@ -1,0 +1,50 @@
+plugins {
+    id 'groovy'
+    id 'application'
+    id 'eclipse'
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.groovy:groovy:4.0.7'
+    implementation 'org.apache.groovy:groovy-json:4.0.7'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
+    
+    implementation 'org.languagetool:languagetool-core:6.0'
+    implementation 'org.languagetool:language-uk:6.0'
+    implementation 'ua.net.nlp:nlp_uk:3.1.1-SNAPSHOT'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.7'
+
+    testImplementation ('org.springframework.boot:spring-boot-starter-test:3.0.1')
+//    testImplementation 'org.springframework:spring-test:6.0.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.+'
+//    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.+'
+
+    // This dependency is used by the application.
+//    implementation 'com.google.guava:guava:31.1-jre'
+}
+
+compileGroovy {
+    groovyOptions.forkOptions.jvmArgs = [ '-Dgroovy.grape.enable=false' ]
+}
+
+tasks.withType(GroovyCompile) {
+    options.compilerArgs += [ '-Dgroovy.grape.enable=false' ]
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+application {
+    // Define the main class for the application.
+    mainClass = 'ua.net.nlp.api.App'
+}
