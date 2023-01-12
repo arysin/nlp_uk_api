@@ -1,11 +1,17 @@
-FROM openjdk:17-alpine
+#FROM openjdk:17-alpine
 
-#RUN set -ex \
-#  && apt-get update
+FROM ubuntu:20.04
 
-ADD . app/ gradle/ settings.gradle gradlew
-RUN chmod +x ./gradlew; /bin/sh ./gradlew build
+RUN apt update
+RUN apt install -y openjdk-17-jdk-headless
+
+COPY gradlew settings.gradle /opt/nlp_uk_api/
+COPY gradle/ /opt/nlp_uk_api/gradle
+COPY app/src /opt/nlp_uk_api/app/src
+COPY app/build.gradle /opt/nlp_uk_api/app
+
+RUN cd /opt/nlp_uk_api/ && /bin/sh ./gradlew --no-daemon build
 
 EXPOSE 8080
-WORKDIR /app
-CMD /bin/sh ../gradlew -q --no-daemon run
+WORKDIR /opt/nlp_uk_api
+CMD /bin/sh ./gradlew -q --no-daemon run 2>&1 > run.log
