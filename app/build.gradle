@@ -8,6 +8,9 @@ repositories {
     // Use Maven Central for resolving dependencies.
     mavenLocal()
     mavenCentral()
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
 }
 
 dependencies {
@@ -43,6 +46,14 @@ test {
     useJUnitPlatform()
 }
 
+task copyRuntimeLibs(type: Copy) {
+    into "${buildDir}/lib"
+    from configurations.runtimeClasspath
+
+    doFirst {
+        delete files("${buildDir}/lib")
+    }
+}
 
 application {
     // Define the main class for the application.
