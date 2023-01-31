@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
 import ua.net.nlp.api.App
+import ua.net.nlp.api.BatchController.BatchRequest
+import ua.net.nlp.api.BatchController.BatchResponse
 import ua.net.nlp.api.CleanController.CleanRequest
 import ua.net.nlp.api.CleanController.CleanResponse
 import ua.net.nlp.api.LemmatizeController.LemmatizeRequest
@@ -30,9 +32,10 @@ public class HttpRequestTest {
     @Test
     public void testTokenize() throws Exception {
         def url = "http://localhost:" + port + "/tokenize"
-        def request = new TokenizeRequest(text: "своїх слів. Мастер.")
+        def request = new TokenizeRequest(text: "-20 градусів. Там-то.")
         def resp = restTemplate.postForObject(url, request, TokenizeResponse.class)
-        assertEquals ([["своїх", "слів"], ["Мастер"]], resp.tokens)
+        // -20 will be split in LT 6.1 / nlp_uk 3.2
+        assertEquals ([["-20", " ", "градусів", "."], ["Там", "-то", "."]], resp.tokens)
     }
 
     @Test
@@ -57,4 +60,16 @@ public class HttpRequestTest {
 """
         assertEquals expectedNotes, resp.notes
     }
+    
+    
+    @Test
+    public void testBatch() throws Exception {
+        def url = "http://localhost:" + port + "/batch"
+        // лат. літери в укр словах + кирилиця в XXI 
+        def request = new BatchRequest(text: "Сьогодні y про\u00ACдажi. Екс-«депутат» у XХІ столітті.")
+        BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
+        assertEquals ([["Сьогодні", " ", "у", " ", "продажі", "."], ["Екс-«депутат»", " ", "у", " ", "XXI", " ", "столітті", "."]], resp.tokenized)
+        assertEquals ([["сьогодні", "у", "продаж"], ["екс-депутат", "у", "XXI", "століття"]], resp.lemmatized)
+    }
+
 }

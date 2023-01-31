@@ -1,5 +1,6 @@
 package ua.net.nlp.api.services
 
+import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 
 import groovy.transform.CompileStatic
@@ -14,7 +15,13 @@ class TokenizeService {
     
     List<List<String>> tokenize(String text, boolean wordsOnly) {
         List<List<String>> ret = tokenizer.splitWordsInternal(text, wordsOnly)
-        
+        ret.forEach{
+            if( it.size() > 0 ) {
+                if( StringUtils.isBlank(it[-1]) ) {
+                    it.remove(it.size()-1)
+                }
+            }
+        }
         return ret
     }
 }

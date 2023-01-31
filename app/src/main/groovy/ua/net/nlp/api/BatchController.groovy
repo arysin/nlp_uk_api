@@ -15,44 +15,48 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import ua.net.nlp.api.BaseController.RequestBase
-import ua.net.nlp.api.BaseController.ResponseBase
+import ua.net.nlp.api.services.CleanService
+import ua.net.nlp.api.services.LemmatizeService
 import ua.net.nlp.api.services.TokenizeService
+import ua.net.nlp.other.CleanText.CleanOptions
 
 
-@Tag(name = "Tokenization services",
-    description = "Tokenization services for Ukrainian language"
+@Tag(name = "Batch text processing services",
+    description = "Batch text processing services for Ukrainian language"
 )
 @RestController
 @RequestMapping('')
 @CompileStatic
-class TokenizeController extends BaseController {
+class BatchController extends BaseController {
 
     @Autowired
+    CleanService cleanService
+    @Autowired
     TokenizeService tokenizeService
+    @Autowired
+    LemmatizeService lemmatizeService
 
-    @Operation(summary = "Tokenize the text"
+    @Operation(summary = "Clean, tokenize, and lemmatize the text"
     )
     @ApiResponses(value = [
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Invalid request")
     ])
-    @PostMapping(path="/tokenize")
+    @PostMapping(path="/batch")
     def tokenize(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description='Body text; e.g<br>{"text": "Сьогодні у продажі. 12-те зібрання творів 1969 р. І. П. Котляревського."}', 
+            description='Body text; e.g<br>{"text": "Сьогодні y продажi «ХХІ століття»."}', 
             required = true)
-        @RequestBody TokenizeRequest request) {
+        @RequestBody BatchRequest request) {
         
         validateRequest(request)
 
         try {
-            def tokens = tokenizeService.tokenize(request.text, request.wordsOnly)
-
-            def response = new TokenizeResponse(tokens: tokens)
-
-            updateNotes(request, response)
-
-            return response
+            def response = cleanService.clean(request.text, new CleanOptions())
+            def tokenized = tokenizeService.tokenize(response.text, false)
+            def lemmatized = lemmatizeService.lemmatize(response.text)
+            
+            return new BatchResponse(tokenized: tokenized, lemmatized: lemmatized)
         }
         catch(Exception e) {
             e.printStackTrace()
@@ -61,17 +65,15 @@ class TokenizeController extends BaseController {
 
     }
 
-    @Schema(description="Request to tokenize text.")
+    @Schema(description="Request to clean, tokenize, and lemmatize text.")
     @CompileStatic
-    static class TokenizeResponse extends ResponseBase {
-        @Schema(description="List of tokenized tokens inside the list of sentences.")
-        List<List<String>> tokens
+    static class BatchRequest extends RequestBase {
     }
 
-    @Schema(description="Request to tokenize text.")
+    @Schema(description="Response with tokenized and lemmatized text.")
     @CompileStatic
-    static class TokenizeRequest extends RequestBase {
-        @Schema(description="If true only words will be returned, otherwise other tokens will be returned as well.", defaultValue = "false")
-        boolean wordsOnly = false
+    static class BatchResponse {
+        List<List<String>> tokenized
+        List<List<String>> lemmatized
     }
 }
