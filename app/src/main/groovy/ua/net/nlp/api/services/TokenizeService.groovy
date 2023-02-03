@@ -15,6 +15,11 @@ class TokenizeService {
     
     List<List<String>> tokenize(String text, boolean wordsOnly) {
         List<List<String>> ret = tokenizer.splitWordsInternal(text, wordsOnly)
+        trim(ret)
+        return ret
+    }
+    
+    def trim(List<List<String>> ret) {
         ret.forEach{
             if( it.size() > 0 ) {
                 if( StringUtils.isBlank(it[-1]) ) {
@@ -22,6 +27,5 @@ class TokenizeService {
                 }
             }
         }
-        return ret
     }
 }

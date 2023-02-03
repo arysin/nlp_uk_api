@@ -56,7 +56,7 @@ public class HttpRequestTest {
         def expectedNotes = 
 """\tremoving U+00AC hyphens: 
 \tlatin/cyrillic mix
-\tconverted 1 lat->cyr, 0 cyr->lat
+\tconverted 1 lat->cyr, 2 cyr->lat
 """
         assertEquals expectedNotes, resp.notes
     }

@@ -15,15 +15,19 @@ class CleanService {
     
     CleanResponse clean(String text, CleanOptions options) {
         def sb = new StringBuilder(512)
-        CleanText cleanText = new CleanText(new CleanOptions()) {
+        CleanText cleanText = new CleanText(options) {
             void _println(String txt) {
                 sb.append(txt).append("\n")
             }
         }
-        text = cleanText.cleanUp(text, new File("/dev/null"), options, new File("/dev/null"))
+
+        int nlIdx = text.indexOf("\n")
+        int dosNlIdx = text.indexOf("\r\n")
+        boolean dosNlPresent = dosNlIdx >= 0 && dosNlIdx+1 == nlIdx
+
+        text = cleanText.cleanText(text, new File("/dev/null"), new File("/dev/null"), dosNlPresent)
         
         return new CleanResponse(text: text, notes: sb.toString())
     }
-    
     
 }

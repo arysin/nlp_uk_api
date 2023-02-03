@@ -15,10 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import ua.net.nlp.api.BaseController.RequestBase
-import ua.net.nlp.api.services.CleanService
-import ua.net.nlp.api.services.LemmatizeService
-import ua.net.nlp.api.services.TokenizeService
-import ua.net.nlp.other.CleanText.CleanOptions
+import ua.net.nlp.api.services.BatchService
 
 
 @Tag(name = "Batch text processing services",
@@ -30,11 +27,8 @@ import ua.net.nlp.other.CleanText.CleanOptions
 class BatchController extends BaseController {
 
     @Autowired
-    CleanService cleanService
-    @Autowired
-    TokenizeService tokenizeService
-    @Autowired
-    LemmatizeService lemmatizeService
+    BatchService batchService
+
 
     @Operation(summary = "Clean, tokenize, and lemmatize the text"
     )
@@ -52,11 +46,7 @@ class BatchController extends BaseController {
         validateRequest(request)
 
         try {
-            def response = cleanService.clean(request.text, new CleanOptions())
-            def tokenized = tokenizeService.tokenize(response.text, false)
-            def lemmatized = lemmatizeService.lemmatize(response.text)
-            
-            return new BatchResponse(tokenized: tokenized, lemmatized: lemmatized)
+            batchService.batch(request.text)
         }
         catch(Exception e) {
             e.printStackTrace()
