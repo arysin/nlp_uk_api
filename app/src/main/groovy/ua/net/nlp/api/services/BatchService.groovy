@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 
 import groovy.transform.CompileStatic
 import ua.net.nlp.api.BatchController.BatchResponse
-import ua.net.nlp.other.CleanText.CleanOptions
+import ua.net.nlp.other.clean.CleanOptions
 import ua.net.nlp.tools.tag.TagOptions
 import ua.net.nlp.tools.tag.TagStats
 import ua.net.nlp.tools.tag.TagTextCore
@@ -22,10 +22,10 @@ class BatchService {
     @Autowired
     TokenizeService tokenizeService
 
-    TagTextCore tagger = new TagTextCore()
+//    TagTextCore tagger = new TagTextCore()
     
     BatchService() {
-        tagger.setOptions(new TagOptions(disambiguate: true, singleTokenOnly: true, setLemmaForUnknown: true, tagUnknown: true, quiet: true))
+//        tagger.setOptions(new TagOptions(disambiguate: true, singleTokenOnly: true, setLemmaForUnknown: true, tagUnknown: true, quiet: true))
     }
     
     BatchResponse batch(String text) {

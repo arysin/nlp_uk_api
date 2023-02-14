@@ -1,33 +1,52 @@
 package ua.net.nlp.api.services
 
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
+
+import org.slf4j.Logger
+import org.slf4j.helpers.AbstractLogger
+import org.slf4j.helpers.NOPLogger
+import org.slf4j.helpers.NamedLoggerBase
 import org.springframework.stereotype.Component
 
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import ua.net.nlp.api.CleanController.CleanResponse
-import ua.net.nlp.other.CleanText
-import ua.net.nlp.other.CleanText.CleanOptions
+import ua.net.nlp.other.clean.CleanTextCore
+import ua.net.nlp.other.clean.OutputTrait
+import ua.net.nlp.other.clean.CleanOptions
 
 
 @Component
 @CompileStatic
 class CleanService {
-    
+
     CleanResponse clean(String text, CleanOptions options) {
+        CleanTextCore cleanText = new CleanTextCore(options)
+
         def sb = new StringBuilder(512)
-        CleanText cleanText = new CleanText(options) {
-            void _println(String txt) {
-                sb.append(txt).append("\n")
-            }
-        }
-
-        int nlIdx = text.indexOf("\n")
-        int dosNlIdx = text.indexOf("\r\n")
-        boolean dosNlPresent = dosNlIdx >= 0 && dosNlIdx+1 == nlIdx
-
-        text = cleanText.cleanText(text, new File("/dev/null"), new File("/dev/null"), dosNlPresent)
         
-        return new CleanResponse(text: text, notes: sb.toString())
+        cleanText.out.logger = getLogger(sb)
+        
+        def res = cleanText.cleanText(text, null, null)
+        
+        return new CleanResponse(text: res, notes: sb.toString())
     }
     
+    private Logger getLogger(StringBuilder sb) {
+        (Logger) Proxy.newProxyInstance(
+            getClass().getClassLoader(),
+            [ Logger.class ] as Class[],
+                 { proxy, Method method, Object[] methodArgs ->
+                    if (method.getName().equals("info")) {
+                        sb.append(methodArgs[0]).append("\n")
+                    }
+                    else if (method.getName().equals("debug")) {
+//                        sb.append(methodArgs[0]).append("\n")
+                    } else {
+//                        throw new UnsupportedOperationException("Unsupported method: ${method.getName()}")
+                    }
+                })
+    }
 }

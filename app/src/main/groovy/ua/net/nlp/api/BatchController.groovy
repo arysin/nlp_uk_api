@@ -37,7 +37,7 @@ class BatchController extends BaseController {
             @ApiResponse(responseCode = "400", description = "Invalid request")
     ])
     @PostMapping(path="/batch")
-    def tokenize(
+    def batch(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description='Body text; e.g<br>{"text": "Сьогодні y продажi «ХХІ століття»."}', 
             required = true)

@@ -2,6 +2,8 @@ package nlp_uk_api
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertNotNull
+import static org.junit.jupiter.api.Assumptions.assumeTrue
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus
 
 import ua.net.nlp.api.App
 import ua.net.nlp.api.BatchController.BatchRequest
@@ -70,6 +73,30 @@ public class HttpRequestTest {
         BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
         assertEquals ([["Сьогодні", " ", "у", " ", "продажі", "."], ["Екс-«депутат»", " ", "у", " ", "XXI", " ", "столітті", "."]], resp.tokenized)
         assertEquals ([["сьогодні", "у", "продаж"], ["екс-депутат", "у", "XXI", "століття"]], resp.lemmatized)
+    }
+    
+    @Test
+    public void testBatchHugePayload() throws Exception {
+        def bigFile = getClass().getClassLoader().getResource("big_file.txt")
+        assumeTrue bigFile != null
+        
+        def url = "http://localhost:" + port + "/batch"
+        def w = "десь що \n"
+//        def cnt = (int)(15*1024*1024 / w.length())
+//        def text = w.repeat(cnt)
+        def text = bigFile.getText('UTF-8')
+        def request = new BatchRequest(text: text)
+
+        BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
+        
+        assertNotNull resp.tokenized
+        assertEquals 67182, resp.tokenized.size()
+        assertEquals 9, resp.tokenized[0].size()
+//        assertEquals(['Машини', ' ', '-', ' ', 'не', ' ', 'розкіш', '...'. "\n"], resp.tokenized[0])
+
+        assertNotNull resp.lemmatized
+        assertEquals 67182, resp.lemmatized.size()
+        assertEquals(['машина', 'не', 'розкіш'], resp.lemmatized[0])
     }
 
 }

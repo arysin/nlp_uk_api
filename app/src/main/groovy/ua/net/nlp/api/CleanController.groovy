@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import ua.net.nlp.api.BaseController.RequestBase
 import ua.net.nlp.api.BaseController.ResponseBase
 import ua.net.nlp.api.services.CleanService
-import ua.net.nlp.other.CleanText.CleanOptions
+import ua.net.nlp.other.clean.CleanOptions
 
 
 @Tag(name = "Text cleanup services",

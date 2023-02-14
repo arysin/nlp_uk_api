@@ -13,8 +13,8 @@ import ua.net.nlp.api.TokenizeController.TokenizeResponse
 @CompileStatic
 class BaseController {
 
-    @Value('${ua.net.nlp.api.maxTextLength:1048576}')
-    int TEXT_LIMIT = 1048576
+    @Value('${ua.net.nlp.api.maxTextLength:314572800}')
+    int TEXT_LIMIT = 300*1024*1024
 
     def validateRequest(RequestBase request) {
         if( ! request.text ) {
