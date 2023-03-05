@@ -6,10 +6,6 @@ import org.springframework.stereotype.Component
 import groovy.transform.CompileStatic
 import ua.net.nlp.api.BatchController.BatchResponse
 import ua.net.nlp.other.clean.CleanOptions
-import ua.net.nlp.tools.tag.TagOptions
-import ua.net.nlp.tools.tag.TagStats
-import ua.net.nlp.tools.tag.TagTextCore
-import ua.net.nlp.tools.tag.TagTextCore.TTR
 
 
 @Component
@@ -41,7 +37,7 @@ class BatchService {
         }
         tokenizeService.trim(tokenized)
         
-        def tagged = lemmatizeService.tagger.tagTextCore(sentences, new TagStats())
+        def tagged = lemmatizeService.tagger.tagTextCore(sentences, null)
         def lemmatized = lemmatizeService.lemmatizeTokens(tagged)
         
         return new BatchResponse(tokenized: tokenized, lemmatized: lemmatized)

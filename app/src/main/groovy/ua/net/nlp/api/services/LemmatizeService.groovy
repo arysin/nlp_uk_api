@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component
 
 import groovy.transform.CompileStatic
 import ua.net.nlp.tools.tag.TagOptions
-import ua.net.nlp.tools.tag.TagStats
 import ua.net.nlp.tools.tag.TagTextCore
 import ua.net.nlp.tools.tag.TagTextCore.TTR
 
@@ -19,7 +18,7 @@ class LemmatizeService {
     }
     
     List<List<TTR>> tag(String text) {
-        tagger.tagTextCore(text, new TagStats())
+        tagger.tagTextCore(text, null)
     }
     
     List<List<String>> lemmatize(String text) {
