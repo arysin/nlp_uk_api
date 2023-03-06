@@ -2,6 +2,7 @@ package ua.net.nlp.api
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,11 +27,33 @@ import ua.net.nlp.api.services.BatchService
 @CompileStatic
 class BatchController extends BaseController {
 
+    @Value('${ua.net.nlp.api.maxBatchSize:100}')
+    int BATCH_SIZE_LIMIT = 100
+
     @Autowired
     BatchService batchService
 
+    def validateRequest(BatchRequest request) {
+        if( ! request.texts ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Texts are empty.")
+        }
 
-    @Operation(summary = "Clean, tokenize, and lemmatize the text"
+        if( request.texts.size() > BATCH_SIZE_LIMIT ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many texts.")
+        }
+
+        request.texts.each { 
+            if( ! it ) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Text is empty.")
+            }
+
+            if( it.size() > TEXT_LIMIT ) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Text size is too big.")
+            }
+        }
+    }
+
+    @Operation(summary = "Clean, tokenize, and lemmatize the texts"
     )
     @ApiResponses(value = [
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -39,14 +62,16 @@ class BatchController extends BaseController {
     @PostMapping(path="/batch")
     def batch(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            description='Body text; e.g<br>{"text": "Сьогодні y продажi «ХХІ століття»."}', 
+            description='Body text; e.g<br>{"texts": ["Сьогодні y продажi «ХХІ століття»."]}', 
             required = true)
         @RequestBody BatchRequest request) {
         
         validateRequest(request)
 
         try {
-            batchService.batch(request.text)
+            return request.texts.parallelStream().collect { String text ->
+                batchService.batch(text)
+            }
         }
         catch(Exception e) {
             e.printStackTrace()
@@ -57,13 +82,18 @@ class BatchController extends BaseController {
 
     @Schema(description="Request to clean, tokenize, and lemmatize text.")
     @CompileStatic
-    static class BatchRequest extends RequestBase {
+    static class BatchRequest {
+        @Schema(description="Texts to process.")
+        List<String> texts
     }
+
 
     @Schema(description="Response with tokenized and lemmatized text.")
     @CompileStatic
     static class BatchResponse {
-        List<List<String>> tokenized
-        List<List<String>> lemmatized
+        String cleanText
+        List<List<String>> tokens
+        List<List<String>> lemmas
+        List<String> sentences
     }
 }

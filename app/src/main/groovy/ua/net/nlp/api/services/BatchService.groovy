@@ -35,12 +35,16 @@ class BatchService {
                 at.getToken()
             }
         }
+        def segments = sentences.collect(s -> 
+            s.getText().trim()
+        )
+
         tokenizeService.trim(tokenized)
         
         def tagged = lemmatizeService.tagger.tagTextCore(sentences, null)
         def lemmatized = lemmatizeService.lemmatizeTokens(tagged)
         
-        return new BatchResponse(tokenized: tokenized, lemmatized: lemmatized)
+        return new BatchResponse(tokens: tokenized, lemmas: lemmatized, cleanText: response.text, sentences: segments)
     }
     
 }
