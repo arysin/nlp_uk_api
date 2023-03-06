@@ -69,10 +69,19 @@ public class HttpRequestTest {
     public void testBatch() throws Exception {
         def url = "http://localhost:" + port + "/batch"
         // лат. літери в укр словах + кирилиця в XXI 
-        def request = new BatchRequest(text: "Сьогодні y про\u00ACдажi. Екс-«депутат» у XХІ столітті.")
-        BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
-        assertEquals ([["Сьогодні", " ", "у", " ", "продажі", "."], ["Екс-«депутат»", " ", "у", " ", "XXI", " ", "столітті", "."]], resp.tokenized)
-        assertEquals ([["сьогодні", "у", "продаж"], ["екс-депутат", "у", "XXI", "століття"]], resp.lemmatized)
+        def request = new BatchRequest(texts: ["Сьогодні y про\u00ACдажi. Екс-«депутат» у XХІ столітті.", "Привіт, як справи?"])
+        List<BatchResponse> resp = restTemplate.postForObject(url, request, BatchResponse[].class)
+
+        assertEquals ("Сьогодні у продажі. Екс-«депутат» у XXI столітті.", resp[0].cleanText)
+        assertEquals (["Сьогодні у продажі.", "Екс-«депутат» у XXI столітті."], resp[0].sentences)
+        assertEquals ([["Сьогодні", " ", "у", " ", "продажі", "."], ["Екс-«депутат»", " ", "у", " ", "XXI", " ", "столітті", "."]], resp[0].tokens)
+        assertEquals ([["сьогодні", "у", "продаж"], ["екс-депутат", "у", "XXI", "століття"]], resp[0].lemmas)
+
+        assertEquals ("Привіт, як справи?", resp[1].cleanText)
+        assertEquals (["Привіт, як справи?"], resp[1].sentences)
+        assertEquals ([["Привіт", ",", " ", "як", " ", "справи", "?"]], resp[1].tokens)
+        assertEquals ([["привіт", "як", "справа"]], resp[1].lemmas)
+        assertEquals(resp.size(), 2)
     }
     
     @Test
@@ -85,18 +94,19 @@ public class HttpRequestTest {
 //        def cnt = (int)(15*1024*1024 / w.length())
 //        def text = w.repeat(cnt)
         def text = bigFile.getText('UTF-8')
-        def request = new BatchRequest(text: text)
+        def request = new BatchRequest(texts: [text])
 
         BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
         
-        assertNotNull resp.tokenized
-        assertEquals 67182, resp.tokenized.size()
-        assertEquals 9, resp.tokenized[0].size()
+        assertEquals 67182, resp.sentences.size()
+        assertNotNull resp.tokens
+        assertEquals 67182, resp.tokens.size()
+        assertEquals 9, resp.tokens[0].size()
 //        assertEquals(['Машини', ' ', '-', ' ', 'не', ' ', 'розкіш', '...'. "\n"], resp.tokenized[0])
 
-        assertNotNull resp.lemmatized
-        assertEquals 67182, resp.lemmatized.size()
-        assertEquals(['машина', 'не', 'розкіш'], resp.lemmatized[0])
+        assertNotNull resp.lemmas
+        assertEquals 67182, resp.lemmas.size()
+        assertEquals(['машина', 'не', 'розкіш'], resp.lemmas[0])
     }
 
 }
