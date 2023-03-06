@@ -2,6 +2,7 @@ package ua.net.nlp.api
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,18 +27,29 @@ import ua.net.nlp.api.services.BatchService
 @CompileStatic
 class BatchController extends BaseController {
 
+    @Value('${ua.net.nlp.api.maxBatchSize:100}')
+    int BATCH_SIZE_LIMIT = 100
+
     @Autowired
     BatchService batchService
 
     def validateRequest(BatchRequest request) {
-        // To Andriy. I think we should allow empty strings, but we clearly should disallow long ones.
-        // How I can assert that all the strings in the list are shorter than TEXT_LIMIT?
         if( ! request.texts ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Texts are empty.")
         }
 
-        if( request.texts.size() > 100 ) {
+        if( request.texts.size() > BATCH_SIZE_LIMIT ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many texts.")
+        }
+
+        request.texts.each { 
+            if( ! it ) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Text is empty.")
+            }
+
+            if( it.size() > TEXT_LIMIT ) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Text size is too big.")
+            }
         }
     }
 
@@ -57,12 +69,7 @@ class BatchController extends BaseController {
         validateRequest(request)
 
         try {
-            // To Andriy. Can I use parallel here? groovy gave me the error when compiling.
-            // Maybe it is related to the old version of it?
-            // Groovy Version: 4.0.5 JVM: 17.0.4.1 Vendor: Homebrew OS: Mac OS X
-            // It's not a mandatory option, so if it's hard to implement, I'd rather skip this one
-            // return request.texts.parallel().collect { text ->
-            return request.texts.collect { text ->
+            return request.texts.parallelStream().collect { String text ->
                 batchService.batch(text)
             }
         }
@@ -84,9 +91,9 @@ class BatchController extends BaseController {
     @Schema(description="Response with tokenized and lemmatized text.")
     @CompileStatic
     static class BatchResponse {
-        String clean
-        List<List<String>> tokenized
-        List<List<String>> lemmatized
-        List<String> segmented
+        String cleanText
+        List<List<String>> tokens
+        List<List<String>> lemmas
+        List<String> sentences
     }
 }
