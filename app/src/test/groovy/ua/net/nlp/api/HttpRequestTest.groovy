@@ -1,4 +1,4 @@
-package nlp_uk_api
+package ua.net.nlp.api
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals
