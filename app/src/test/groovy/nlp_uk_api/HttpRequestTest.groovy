@@ -3,6 +3,7 @@ package nlp_uk_api
 
 import static org.junit.jupiter.api.Assertions.assertEquals
 import static org.junit.jupiter.api.Assertions.assertNotNull
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static org.junit.jupiter.api.Assumptions.assumeTrue
 
 import org.junit.jupiter.api.Test
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 
 import ua.net.nlp.api.App
 import ua.net.nlp.api.BatchController.BatchRequest
@@ -83,6 +85,23 @@ public class HttpRequestTest {
         assertEquals ([["привіт", "як", "справа"]], resp[1].lemmas)
         assertEquals(resp.size(), 2)
     }
+
+    @Test
+    public void testBatchErrorResponse() throws Exception {
+        def url = "http://localhost:" + port + "/batch"
+        
+        def request = new BatchRequest(texts: [])
+        ResponseEntity<String> resp = restTemplate.postForEntity(url, request, String.class)
+        assertEquals HttpStatus.BAD_REQUEST, resp.getStatusCode()
+        assertTrue resp.getBody().contains('message":"Texts are empty."')
+        
+        List<String> tooMany = []
+        (1..101).forEach { tooMany << "x" }
+        request = new BatchRequest(texts: tooMany)
+        resp = restTemplate.postForEntity(url, request, String.class)
+        assertEquals HttpStatus.BAD_REQUEST, resp.getStatusCode()
+        assertTrue resp.getBody().contains('message":"Too many texts."')
+    }
     
     @Test
     public void testBatchHugePayload() throws Exception {
@@ -96,7 +115,9 @@ public class HttpRequestTest {
         def text = bigFile.getText('UTF-8')
         def request = new BatchRequest(texts: [text])
 
-        BatchResponse resp = restTemplate.postForObject(url, request, BatchResponse.class)
+        BatchResponse[] resps = restTemplate.postForObject(url, request, BatchResponse[].class)
+        assertEquals 1, resps.size()
+        BatchResponse resp = resps[0]
         
         assertEquals 67182, resp.sentences.size()
         assertNotNull resp.tokens

@@ -35,9 +35,9 @@ class BatchService {
                 at.getToken()
             }
         }
-        def segments = sentences.collect(s -> 
+        def segments = sentences.collect { s -> 
             s.getText().trim()
-        )
+        }
 
         tokenizeService.trim(tokenized)
         
