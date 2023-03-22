@@ -27,8 +27,8 @@ import ua.net.nlp.api.services.BatchService
 @CompileStatic
 class BatchController extends BaseController {
 
-    @Value('${ua.net.nlp.api.maxBatchSize:100}')
-    int BATCH_SIZE_LIMIT = 100
+    @Value('${ua.net.nlp.api.maxBatchSize:1000}')
+    int BATCH_SIZE_LIMIT = 1000
 
     @Autowired
     BatchService batchService
