@@ -16,8 +16,8 @@ repositories {
 dependencies {
     implementation "org.apache.groovy:groovy:$groovyVersion"
     implementation "org.apache.groovy:groovy-json:$groovyVersion"
-    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.1'
-    
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.4'
+
     implementation("org.languagetool:language-uk:$ltUkVersion") {
         exclude module: 'hunspell'
         exclude module: 'language-detector'
