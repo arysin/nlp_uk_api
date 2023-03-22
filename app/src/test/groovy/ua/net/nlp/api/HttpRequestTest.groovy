@@ -33,6 +33,8 @@ public class HttpRequestTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private BatchController batchController
 
     @Test
     public void testTokenize() throws Exception {
@@ -96,7 +98,8 @@ public class HttpRequestTest {
         assertTrue resp.getBody().contains('message":"Texts are empty."')
         
         List<String> tooMany = []
-        (1..101).forEach { tooMany << "x" }
+        int cnt = batchController.BATCH_SIZE_LIMIT+1
+        (1..cnt).forEach { tooMany << "x" }
         request = new BatchRequest(texts: tooMany)
         resp = restTemplate.postForEntity(url, request, String.class)
         assertEquals HttpStatus.BAD_REQUEST, resp.getStatusCode()
