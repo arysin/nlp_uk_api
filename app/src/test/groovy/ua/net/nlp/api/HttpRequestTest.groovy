@@ -41,8 +41,7 @@ public class HttpRequestTest {
         def url = "http://localhost:" + port + "/tokenize"
         def request = new TokenizeRequest(text: "-20 градусів. Там-то.")
         def resp = restTemplate.postForObject(url, request, TokenizeResponse.class)
-        // -20 will be split in LT 6.1 / nlp_uk 3.2
-        assertEquals ([["-20", " ", "градусів", "."], ["Там", "-то", "."]], resp.tokens)
+        assertEquals ([["-", "20", " ", "градусів", "."], ["Там", "-то", "."]], resp.tokens)
     }
 
     @Test
@@ -122,14 +121,14 @@ public class HttpRequestTest {
         assertEquals 1, resps.size()
         BatchResponse resp = resps[0]
         
-        assertEquals 67182, resp.sentences.size()
+        assertEquals 67183, resp.sentences.size()
         assertNotNull resp.tokens
-        assertEquals 67182, resp.tokens.size()
+        assertEquals 67183, resp.tokens.size()
         assertEquals 9, resp.tokens[0].size()
 //        assertEquals(['Машини', ' ', '-', ' ', 'не', ' ', 'розкіш', '...'. "\n"], resp.tokenized[0])
 
         assertNotNull resp.lemmas
-        assertEquals 67182, resp.lemmas.size()
+        assertEquals 67183, resp.lemmas.size()
         assertEquals(['машина', 'не', 'розкіш'], resp.lemmas[0])
     }
 
