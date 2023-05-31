@@ -32,6 +32,9 @@ dependencies {
         exclude group: 'org.apache.lucene'
         exclude group: 'io.grpc'
     }
+    if( project.hasProperty('morfologik_ukrainian_lt_version') ) {
+        implementation("ua.net.nlp:morfologik-ukrainian-lt:${morfologik_ukrainian_lt_version}")
+    }
 
     implementation "ua.net.nlp:nlp_uk:$nlpUkVersion"
 

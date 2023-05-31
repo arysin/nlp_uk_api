@@ -1,1 +1,4 @@
 big_file.txt
+build/
+bin/
+_api/

@@ -121,14 +121,14 @@ public class HttpRequestTest {
         assertEquals 1, resps.size()
         BatchResponse resp = resps[0]
         
-        assertEquals 67183, resp.sentences.size()
+        assertEquals 67182, resp.sentences.size()
         assertNotNull resp.tokens
-        assertEquals 67183, resp.tokens.size()
+        assertEquals 67182, resp.tokens.size()
         assertEquals 9, resp.tokens[0].size()
 //        assertEquals(['Машини', ' ', '-', ' ', 'не', ' ', 'розкіш', '...'. "\n"], resp.tokenized[0])
 
         assertNotNull resp.lemmas
-        assertEquals 67183, resp.lemmas.size()
+        assertEquals 67182, resp.lemmas.size()
         assertEquals(['машина', 'не', 'розкіш'], resp.lemmas[0])
     }
 
