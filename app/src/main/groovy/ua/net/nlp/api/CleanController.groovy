@@ -38,7 +38,7 @@ class CleanController extends BaseController {
             @ApiResponse(responseCode = "400", description = "Invalid request")
     ])
     @PostMapping(path="/clean")
-    def tokenize(
+    def clean(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description='Body text; e.g<br>{"text": "Сьогодні y продажi «ХХІ століття»."}', 
             required = true)
