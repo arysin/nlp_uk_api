@@ -3,6 +3,7 @@ package ua.net.nlp.api.services
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import java.nio.charset.StandardCharsets
 
 import org.slf4j.Logger
 import org.slf4j.helpers.AbstractLogger
@@ -16,6 +17,7 @@ import ua.net.nlp.api.CleanController.CleanResponse
 import ua.net.nlp.other.clean.CleanTextCore
 import ua.net.nlp.other.clean.OutputTrait
 import ua.net.nlp.other.clean.CleanOptions
+import ua.net.nlp.other.clean.CleanRequest
 
 
 @Component
@@ -25,13 +27,12 @@ class CleanService {
     CleanResponse clean(String text, CleanOptions options) {
         CleanTextCore cleanText = new CleanTextCore(options)
 
-        def sb = new StringBuilder(512)
+        def request = new CleanRequest(text: text, file: null, outFile: null, dosNl: false)
         
-        cleanText.out.logger = getLogger(sb)
+        OutputTrait out = new OutputTrait(options: options)
+        def res = cleanText.cleanText2(request, out)
         
-        def res = cleanText.cleanText(text, null, null)
-        
-        return new CleanResponse(text: res, notes: sb.toString())
+        return new CleanResponse(text: res, notes: out.byteStream.toString(StandardCharsets.UTF_8))
     }
     
     private Logger getLogger(StringBuilder sb) {

@@ -6,6 +6,7 @@ import groovy.transform.CompileStatic
 import ua.net.nlp.tools.tag.TagOptions
 import ua.net.nlp.tools.tag.TagTextCore
 import ua.net.nlp.tools.tag.TagTextCore.TTR
+import ua.net.nlp.tools.tag.TagTextCore.TaggedSentence
 
 
 @Component
@@ -17,22 +18,22 @@ class LemmatizeService {
         tagger.setOptions(new TagOptions(disambiguate: true, singleTokenOnly: true, setLemmaForUnknown: true, tagUnknown: true, quiet: true))
     }
     
-    List<List<TTR>> tag(String text) {
+    List<TaggedSentence> tag(String text) {
         tagger.tagTextCore(text, null)
     }
     
     List<List<String>> lemmatize(String text) {
-        List<List<TTR>> tokens = tag(text)
+        List<TaggedSentence> tokens = tag(text)
 
         lemmatizeTokens(tokens)
     }
     
-    List<List<String>> lemmatizeTokens(List<List<TTR>> tokens) {
-        tokens.findAll { List<TTR> tkns ->
-            tkns.size() > 0
+    List<List<String>> lemmatizeTokens(List<TaggedSentence> tokens) {
+        tokens.findAll { TaggedSentence sent ->
+            sent.tokens
         }
-        .collect { List<TTR> it ->
-            it.findAll { TTR ttr ->
+        .collect { TaggedSentence it ->
+            it.tokens.findAll { TTR ttr ->
                 ttr.tokens[0].tags != 'punct'
             }
             .collect { TTR ttr ->

@@ -46,7 +46,7 @@ class TokenizeController extends BaseController {
         validateRequest(request)
 
         try {
-            def tokens = tokenizeService.tokenize(request.text, request.wordsOnly)
+            def tokens = tokenizeService.tokenize(request.text, request.wordsOnly, request.preserveWhitespace)
 
             def response = new TokenizeResponse(tokens: tokens)
 
@@ -73,5 +73,7 @@ class TokenizeController extends BaseController {
     static class TokenizeRequest extends RequestBase {
         @Schema(description="If true only words will be returned, otherwise other tokens will be returned as well.", defaultValue = "false")
         boolean wordsOnly = false
+        @Schema(description="If true whitespaces will be returned too.", defaultValue = "false")
+        boolean preserveWhitespace = false
     }
 }

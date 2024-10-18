@@ -13,8 +13,8 @@ import ua.net.nlp.tools.tokenize.TokenizeTextCore.TokenizeOptions
 class TokenizeService {
     TokenizeTextCore tokenizer = new TokenizeTextCore(new TokenizeOptions())
     
-    List<List<String>> tokenize(String text, boolean wordsOnly) {
-        List<List<String>> ret = tokenizer.splitWordsInternal(text, wordsOnly)
+    List<List<String>> tokenize(String text, boolean wordsOnly, boolean preserveWhitespace) {
+        List<List<String>> ret = tokenizer.splitWordsInternal(text, wordsOnly, preserveWhitespace)
         trim(ret)
         return ret
     }

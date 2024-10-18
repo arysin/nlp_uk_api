@@ -39,7 +39,7 @@ public class HttpRequestTest {
     @Test
     public void testTokenize() throws Exception {
         def url = "http://localhost:" + port + "/tokenize"
-        def request = new TokenizeRequest(text: "-20 градусів. Там-то.")
+        def request = new TokenizeRequest(preserveWhitespace: true, text: "-20 градусів. Там-то.")
         def resp = restTemplate.postForObject(url, request, TokenizeResponse.class)
         assertEquals ([["-", "20", " ", "градусів", "."], ["Там", "-то", "."]], resp.tokens)
     }
@@ -61,6 +61,7 @@ public class HttpRequestTest {
         
         def expectedNotes = 
 """\tremoving U+00AC hyphens: 
+\t\tNOTE: still contains U+00AC hyphens: одні y про¬дажi «XХІ
 \tlatin/cyrillic mix
 \tconverted 1 lat->cyr, 2 cyr->lat
 """
