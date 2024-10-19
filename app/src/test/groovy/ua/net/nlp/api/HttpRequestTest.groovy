@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 
+import groovy.transform.CompileStatic
 import ua.net.nlp.api.App
 import ua.net.nlp.api.BatchController.BatchRequest
 import ua.net.nlp.api.BatchController.BatchResponse
@@ -22,8 +23,11 @@ import ua.net.nlp.api.CleanController.CleanRequest
 import ua.net.nlp.api.CleanController.CleanResponse
 import ua.net.nlp.api.LemmatizeController.LemmatizeRequest
 import ua.net.nlp.api.LemmatizeController.LemmatizeResponse
+import ua.net.nlp.api.TagController.TagResponse
 import ua.net.nlp.api.TokenizeController.TokenizeRequest
 import ua.net.nlp.api.TokenizeController.TokenizeResponse
+import ua.net.nlp.tools.tag.TagTextCore.TTR
+import ua.net.nlp.tools.tag.TagTextCore.TaggedToken
 
 @SpringBootTest(classes=App.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 public class HttpRequestTest {
@@ -50,6 +54,26 @@ public class HttpRequestTest {
         def request = new LemmatizeRequest(text: "своїх, слів")
         def resp = restTemplate.postForObject(url, request, LemmatizeResponse.class)
         assertEquals ([["свій", "слово"]], resp.tokens)
+    }
+    
+    @CompileStatic
+    @Test
+    public void testTag() throws Exception {
+        def url = "http://localhost:" + port + "/tag"
+        def request = new LemmatizeRequest(text: "Від своїх, слів.")
+        def resp = restTemplate.postForObject(url, request, TagResponse.class)
+        def rslt = resp.tokens
+            .findAll { it.tokens }
+            .collect { sent ->
+                sent.tokens
+                    .collect { TTR ttr ->
+                        TaggedToken t = ttr.tokens[0] 
+                        "${t.value} / ${t.lemma} / ${t.tags}".toString()
+                    } 
+            }
+        def sent1 = ["Від / від / prep", "своїх / свій / adj:p:v_rod:&pron:pos",
+            ", / , / punct", "слів / слово / noun:inanim:p:v_rod", ". / . / punct"]
+        assertEquals ([sent1], rslt)
     }
 
     @Test
@@ -125,7 +149,7 @@ public class HttpRequestTest {
         assertEquals 67182, resp.sentences.size()
         assertNotNull resp.tokens
         assertEquals 67182, resp.tokens.size()
-        assertEquals 9, resp.tokens[0].size()
+        assertEquals 8, resp.tokens[0].size()
 //        assertEquals(['Машини', ' ', '-', ' ', 'не', ' ', 'розкіш', '...'. "\n"], resp.tokenized[0])
 
         assertNotNull resp.lemmas

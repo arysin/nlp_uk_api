@@ -14,20 +14,17 @@ class BatchService {
     @Autowired
     CleanService cleanService
     @Autowired
+    TagService tagService
+    @Autowired
     LemmatizeService lemmatizeService
     @Autowired
     TokenizeService tokenizeService
 
-//    TagTextCore tagger = new TagTextCore()
-    
-    BatchService() {
-//        tagger.setOptions(new TagOptions(disambiguate: true, singleTokenOnly: true, setLemmaForUnknown: true, tagUnknown: true, quiet: true))
-    }
-    
+
     BatchResponse batch(String text) {
         def response = cleanService.clean(text, new CleanOptions())
         
-        def sentences = lemmatizeService.tagger.langTool.analyzeText(response.text)
+        def sentences = tagService.tagger.langTool.analyzeText(response.text)
 
         def tokenized = sentences.collect { s ->
             def tokens = s.getTokens()
@@ -41,7 +38,7 @@ class BatchService {
 
         tokenizeService.trim(tokenized)
         
-        def tagged = lemmatizeService.tagger.tagTextCore(sentences, null)
+        def tagged = tagService.tagger.tagTextCore(sentences, null)
         def lemmatized = lemmatizeService.lemmatizeTokens(tagged)
         
         return new BatchResponse(tokens: tokenized, lemmas: lemmatized, cleanText: response.text, sentences: segments)

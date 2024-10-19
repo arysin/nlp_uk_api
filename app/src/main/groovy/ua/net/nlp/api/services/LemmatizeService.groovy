@@ -1,5 +1,6 @@
 package ua.net.nlp.api.services
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import groovy.transform.CompileStatic
@@ -12,18 +13,12 @@ import ua.net.nlp.tools.tag.TagTextCore.TaggedSentence
 @Component
 @CompileStatic
 class LemmatizeService {
-    TagTextCore tagger = new TagTextCore()
-    
-    LemmatizeService() {
-        tagger.setOptions(new TagOptions(disambiguate: true, singleTokenOnly: true, setLemmaForUnknown: true, tagUnknown: true, quiet: true))
-    }
-    
-    List<TaggedSentence> tag(String text) {
-        tagger.tagTextCore(text, null)
-    }
+    @Autowired
+    TagService tagService
+
     
     List<List<String>> lemmatize(String text) {
-        List<TaggedSentence> tokens = tag(text)
+        List<TaggedSentence> tokens = tagService.tag(text)
 
         lemmatizeTokens(tokens)
     }
